@@ -63,7 +63,7 @@ ReconDashboard/
 - **Dark mode** — default dark theme with clean, minimal UI
 - **Animations** — skeleton shimmer loader, fade+slide-up row transitions
 - **Error handling** — graceful messages for backend down, invalid domains, no results
-- **CORS enabled** — allows all origins (restrict later for production)
+- **CORS locked** — only allows requests from `recon-dashboard-nine.vercel.app`
 - **Web-ready** — PORT env var support for Render, VITE_API_URL for Vercel
 
 ## Running Locally
