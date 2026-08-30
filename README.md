@@ -22,6 +22,11 @@ A lightweight domain reconnaissance tool that discovers subdomains via [crt.sh](
 | Frontend | React 18, Vite, plain CSS                     |
 | Hosting  | Render (backend) + Vercel (frontend)          |
 
+## Live Demo
+
+- **Frontend:** https://recon-dashboard-nine.vercel.app
+- **Backend API:** https://recon-dashboard-api.onrender.com
+
 ## Project Structure
 
 ```
