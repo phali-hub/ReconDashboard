@@ -25,7 +25,7 @@ A lightweight domain reconnaissance tool that discovers subdomains via [crt.sh](
 ## Live Demo
 
 - **Frontend:** https://recon-dashboard-nine.vercel.app
-- **Backend API:** https://recon-dashboard-api.onrender.com
+- **Backend API:** https://recondashboard.onrender.com
 
 ## Project Structure
 
@@ -127,7 +127,7 @@ Set env var `PYTHON_VERSION` = `3.11`.
 
 1. Go to [vercel.com](https://vercel.com) → **Add New Project**
 2. Import repo → set root directory to `frontend`
-3. Add env variable: `VITE_API_URL` = your Render backend URL (e.g. `https://recon-dashboard-api.onrender.com`)
+3. Add env variable: `VITE_API_URL` = your Render backend URL (e.g. `https://recondashboard.onrender.com`)
 4. Deploy
 
 ## Environment Variables
