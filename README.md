@@ -18,7 +18,7 @@ A lightweight domain reconnaissance tool that discovers subdomains via [crt.sh](
 
 | Layer    | Technology                                    |
 |----------|-----------------------------------------------|
-| Backend  | Python, FastAPI, SQLite, httpx (async)        |
+| Backend  | Python 3.11, FastAPI, SQLite, httpx (async)  |
 | Frontend | React 18, Vite, plain CSS                     |
 | Hosting  | Render (backend) + Vercel (frontend)          |
 
@@ -99,7 +99,9 @@ Open `http://localhost:5173`
 3. Connect repo — Render detects `render.yaml` and sets everything up
 4. Deploy
 
-Or manually: **New Web Service** → root dir `backend` → build: `pip install -r requirements.txt` → start: `python main.py`
+Or manually: **New Web Service** → root dir `backend` → build: `pip install -r requirements.txt` → start: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+
+Set env var `PYTHON_VERSION` = `3.11`.
 
 > Free tier spins down after inactivity. First request after idle takes ~30-50s.
 
