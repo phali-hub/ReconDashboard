@@ -103,6 +103,19 @@ Or manually: **New Web Service** → root dir `backend` → build: `pip install 
 
 > Free tier spins down after inactivity. First request after idle takes ~30-50s.
 
+> **⚠️ Important — SQLite data loss on Render:**
+> Render uses an **ephemeral filesystem**. The `recon.db` SQLite file lives on the container's disk, which is **wiped every time** the service:
+> - Redeploys (new push to GitHub, manual deploy, env var change)
+> - Restarts (Render health check failure, manual restart)
+> - Spins down (free tier inactivity) and cold-starts again
+>
+> This means **all scan history is lost on every restart**. Each scan works fine within the same session, but past scans disappear after the next restart.
+>
+> **For a portfolio demo this is acceptable.** If you want persistence, swap SQLite for:
+> - **Render PostgreSQL** (free 90-day trial, then $7/mo) — replace `sqlite3` with `psycopg2` or `asyncpg`
+> - **Turso** (SQLite over the network, free tier available) — works with existing `sqlite3` code via `libsql`
+> - **Neon** (serverless PostgreSQL, free tier) — similar setup to Render PostgreSQL
+
 ### Frontend → Vercel
 
 1. Go to [vercel.com](https://vercel.com) → **Add New Project**
@@ -120,7 +133,7 @@ Or manually: **New Web Service** → root dir `backend` → build: `pip install 
 
 ## Limitations
 
-- **SQLite is ephemeral on Render** — scan history resets on every deploy/restart. Fine for a portfolio demo; swap to PostgreSQL or Turso for persistence.
+- **SQLite is ephemeral on Render** — scan history resets on every deploy/restart. See [Deploying](#deploying) for details and alternatives.
 - **No auth** — open API, anyone can scan.
 - **crt.sh rate limits** — very aggressive scanning may get temporarily blocked.
 
