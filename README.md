@@ -1,50 +1,84 @@
 # Recon Dashboard
 
-A lightweight recon tool that takes a domain name, discovers its subdomains via [crt.sh](https://crt.sh), checks which ones are alive, and reports basic exposure info (status codes and server headers).
+A lightweight domain reconnaissance tool that discovers subdomains via [crt.sh](https://crt.sh), checks which ones are alive, and reports basic exposure info — status codes and server headers.
 
-## Demo
+## What It Does
 
-Enter a domain → get a table of every subdomain, whether it's alive, its HTTP status code, and the `Server` header it exposes.
+1. Enter a domain (e.g. `example.com`)
+2. Fetches all subdomains from crt.sh certificate transparency logs
+3. Deduplicates results
+4. Probes each subdomain asynchronously (max 20 concurrent) to check if it responds
+5. Captures HTTP status code and `Server` header for each alive subdomain
+6. Saves everything to SQLite and displays a color-coded results table
+7. Stores scan history — click any past scan to reload its results
+
+**Result:** A table showing subdomain, alive status (green/red dot), HTTP code, and server software.
 
 ## Tech Stack
 
-- **Backend:** Python 3.14, FastAPI, SQLite, httpx (async HTTP)
-- **Frontend:** React 18, Vite, plain CSS (dark mode)
+| Layer    | Technology                                    |
+|----------|-----------------------------------------------|
+| Backend  | Python, FastAPI, SQLite, httpx (async)        |
+| Frontend | React 18, Vite, plain CSS                     |
+| Hosting  | Render (backend) + Vercel (frontend)          |
 
 ## Project Structure
 
 ```
 ReconDashboard/
 ├── backend/
-│   ├── main.py            # FastAPI app — all endpoints and scan logic
-│   ├── requirements.txt   # Python dependencies
-│   └── README.md          # Backend-specific run instructions
+│   ├── main.py              # FastAPI app — endpoints, scan logic, DB setup
+│   ├── requirements.txt     # Python dependencies (fastapi, uvicorn, httpx)
+│   └── README.md            # Backend-specific run instructions
 ├── frontend/
-│   ├── public/
 │   ├── src/
-│   │   ├── App.jsx        # Main component — scan form, results, past scans
-│   │   ├── App.css        # Dark mode styles, animations, skeleton loader
-│   │   └── main.jsx       # React root mount
-│   ├── index.html
-│   ├── package.json       # Vite + React dependencies
-│   ├── vite.config.js
-│   └── .env               # VITE_API_URL (defaults to localhost:8000)
-└── README.md
+│   │   ├── App.jsx          # Main UI — scan form, results table, past scans sidebar
+│   │   ├── App.css          # Dark theme, skeleton loader, row animations
+│   │   └── main.jsx         # React DOM mount
+│   ├── index.html           # Vite entry HTML
+│   ├── package.json         # Vite + React dependencies
+│   ├── vite.config.js       # Vite configuration
+│   └── .env                 # VITE_API_URL — backend base URL
+├── render.yaml              # Render Blueprint — auto-deploys backend
+├── .gitignore
+└── README.md                # This file
 ```
 
-## Getting Started
+## API Endpoints
+
+| Method | Endpoint       | Description                                    |
+|--------|----------------|------------------------------------------------|
+| GET    | `/`            | Health check — `{"status":"ok"}`               |
+| POST   | `/scan`        | Scan a domain — body: `{"domain":"example.com"}`|
+| GET    | `/scan/{id}`   | Retrieve results for a past scan               |
+| GET    | `/scans`       | List all scans with subdomain counts           |
+
+## Features
+
+- **Async scanning** — up to 20 concurrent httpx requests per scan
+- **Subdomain discovery** — pulls from crt.sh certificate transparency logs
+- **Liveness check** — tries HTTPS first, falls back to HTTP
+- **Server header capture** — identifies exposed web servers
+- **Scan history** — all scans saved to SQLite, browsable via sidebar
+- **Dark mode** — default dark theme with clean, minimal UI
+- **Animations** — skeleton shimmer loader, fade+slide-up row transitions
+- **Error handling** — graceful messages for backend down, invalid domains, no results
+- **CORS enabled** — allows all origins (restrict later for production)
+- **Web-ready** — PORT env var support for Render, VITE_API_URL for Vercel
+
+## Running Locally
 
 ### Backend
 
 ```bash
 cd backend
 python -m venv venv
-venv\Scripts\activate          # Windows
+venv\Scripts\activate          # Windows (source venv/bin/activate on Mac/Linux)
 python -m pip install -r requirements.txt
 python -m uvicorn main:app --reload
 ```
 
-API runs at `http://localhost:8000`. Interactive docs at `/docs`.
+API at `http://localhost:8000` — docs at `/docs`
 
 ### Frontend
 
@@ -54,35 +88,41 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:5173` in your browser.
+Open `http://localhost:5173`
 
-## API Endpoints
+## Deploying
 
-| Method | Endpoint       | Description                              |
-|--------|----------------|------------------------------------------|
-| GET    | `/`            | Health check — returns `{"status":"ok"}` |
-| POST   | `/scan`        | Start a scan — body: `{"domain":"..."}`  |
-| GET    | `/scan/{id}`   | Get results for a specific scan          |
-| GET    | `/scans`       | List all past scans with subdomain counts|
+### Backend → Render
 
-## How It Works
+1. Push repo to GitHub
+2. Go to [render.com](https://render.com) → **New** → **Blueprint**
+3. Connect repo — Render detects `render.yaml` and sets everything up
+4. Deploy
 
-1. You enter a domain (e.g. `example.com`)
-2. The backend queries crt.sh for all subdomains matching `%.example.com`
-3. Results are deduplicated
-4. Each subdomain is probed with an async HEAD/GET request (max 20 concurrent)
-5. Alive status, HTTP status code, and `Server` header are captured
-6. Everything is saved to SQLite and returned to the frontend
-7. The frontend displays a color-coded table (green = alive, red = dead)
-8. Past scans appear in a sidebar — click one to reload its results
+Or manually: **New Web Service** → root dir `backend` → build: `pip install -r requirements.txt` → start: `python main.py`
+
+> Free tier spins down after inactivity. First request after idle takes ~30-50s.
+
+### Frontend → Vercel
+
+1. Go to [vercel.com](https://vercel.com) → **Add New Project**
+2. Import repo → set root directory to `frontend`
+3. Add env variable: `VITE_API_URL` = your Render backend URL (e.g. `https://recon-dashboard-api.onrender.com`)
+4. Deploy
 
 ## Environment Variables
 
-### Frontend
+| Variable      | Where    | Default                 | Description                     |
+|---------------|----------|-------------------------|---------------------------------|
+| `VITE_API_URL`| Frontend | `http://localhost:8000` | Backend API base URL            |
+| `PORT`        | Backend  | `8000`                  | Server port (set by Render)     |
+| `DB_PATH`     | Backend  | `recon.db`              | SQLite database file path       |
 
-| Variable      | Default                  | Description         |
-|---------------|--------------------------|---------------------|
-| `VITE_API_URL`| `http://localhost:8000`  | Backend API base URL|
+## Limitations
+
+- **SQLite is ephemeral on Render** — scan history resets on every deploy/restart. Fine for a portfolio demo; swap to PostgreSQL or Turso for persistence.
+- **No auth** — open API, anyone can scan.
+- **crt.sh rate limits** — very aggressive scanning may get temporarily blocked.
 
 ## License
 

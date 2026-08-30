@@ -1,4 +1,5 @@
 import asyncio
+import os
 import sqlite3
 from datetime import datetime, timezone
 from contextlib import asynccontextmanager
@@ -8,7 +9,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-DB_PATH = "recon.db"
+DB_PATH = os.environ.get("DB_PATH", "recon.db")
 MAX_CONCURRENT = 20
 CRT_SH_URL = "https://crt.sh/?q=%25.{domain}&output=json"
 TIMEOUT = 8
@@ -223,3 +224,10 @@ def list_scans():
         {"id": r["id"], "domain": r["domain"], "created_at": r["created_at"], "subdomain_count": r["subdomain_count"]}
         for r in rows
     ]
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
