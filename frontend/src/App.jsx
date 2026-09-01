@@ -69,6 +69,8 @@ export default function App() {
     }
   }
 
+  const showWelcome = !results && !loading && !error
+
   return (
     <div className="app">
       <aside className="sidebar">
@@ -106,6 +108,51 @@ export default function App() {
         </form>
 
         {error && <div className="error-msg">{error}</div>}
+
+        {showWelcome && (
+          <div className="welcome">
+            <div className="welcome-icon">
+              <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="32" cy="32" r="30" stroke="var(--accent)" strokeWidth="2" opacity="0.3"/>
+                <circle cx="32" cy="32" r="20" stroke="var(--accent)" strokeWidth="2" opacity="0.5"/>
+                <circle cx="32" cy="32" r="10" stroke="var(--accent)" strokeWidth="2" opacity="0.7"/>
+                <circle cx="32" cy="32" r="3" fill="var(--accent)"/>
+                <line x1="32" y1="2" x2="32" y2="12" stroke="var(--accent)" strokeWidth="1.5" opacity="0.4"/>
+                <line x1="32" y1="52" x2="32" y2="62" stroke="var(--accent)" strokeWidth="1.5" opacity="0.4"/>
+                <line x1="2" y1="32" x2="12" y2="32" stroke="var(--accent)" strokeWidth="1.5" opacity="0.4"/>
+                <line x1="52" y1="32" x2="62" y2="32" stroke="var(--accent)" strokeWidth="1.5" opacity="0.4"/>
+              </svg>
+            </div>
+            <h1 className="welcome-title">Recon Dashboard</h1>
+            <p className="welcome-desc">
+              Discover subdomains, check liveness, and identify exposed servers — all in one place.
+            </p>
+            <div className="welcome-features">
+              <div className="feature">
+                <span className="feature-icon">🔍</span>
+                <div>
+                  <h3>Subdomain Discovery</h3>
+                  <p>Pulls from crt.sh certificate transparency logs to find every subdomain tied to your target.</p>
+                </div>
+              </div>
+              <div className="feature">
+                <span className="feature-icon">🟢</span>
+                <div>
+                  <h3>Liveness Check</h3>
+                  <p>Async probes each subdomain to see if it responds — HTTPS first, HTTP fallback.</p>
+                </div>
+              </div>
+              <div className="feature">
+                <span className="feature-icon">📡</span>
+                <div>
+                  <h3>Server Fingerprinting</h3>
+                  <p>Captures the Server header to reveal what software is running behind each subdomain.</p>
+                </div>
+              </div>
+            </div>
+            <p className="welcome-cta">Enter a domain above to start scanning.</p>
+          </div>
+        )}
 
         {loading && (
           <div className="skeleton-table">
